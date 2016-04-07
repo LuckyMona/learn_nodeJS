@@ -1,0 +1,5 @@
+{
+"name":"echo_node",
+"main":"./bin/echo_node.js",
+
+}

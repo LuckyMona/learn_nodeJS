@@ -1,0 +1,45 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'D:\\Program Files\\nodeJS2\\\\node.exe',
+1 verbose cli   'D:\\Program Files\\nodeJS2\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'adduser' ]
+2 info using npm@1.4.3
+3 info using node@v0.10.26
+4 verbose node symlink D:\Program Files\nodeJS2\\node.exe
+5 verbose adduser before first PUT { name: 'super_mary',
+5 verbose adduser   salt: 'XXXXX',
+5 verbose adduser   password_sha: 'XXXXX',
+5 verbose adduser   email: 'miao.hnlk@foxmail.com',
+5 verbose adduser   _id: 'org.couchdb.user:super_mary',
+5 verbose adduser   type: 'user',
+5 verbose adduser   roles: [],
+5 verbose adduser   date: '2016-04-07T07:09:15.949Z' }
+6 verbose url raw /-/user/org.couchdb.user:super_mary
+7 verbose url resolving [ 'https://registry.npmjs.org/',
+7 verbose url resolving   './-/user/org.couchdb.user:super_mary' ]
+8 verbose url resolved https://registry.npmjs.org/-/user/org.couchdb.user:super_mary
+9 info trying registry request attempt 1 at 15:09:15
+10 http PUT https://registry.npmjs.org/-/user/org.couchdb.user:super_mary
+11 http 400 https://registry.npmjs.org/-/user/org.couchdb.user:super_mary
+12 verbose adduser back [ [Error: ValidationError: child "password" fails because ["password" is required] : -/user/org.couchdb.user:super_mary],
+12 verbose adduser   { ok: false,
+12 verbose adduser     error: 'ValidationError: child "password" fails because ["password" is required]' },
+12 verbose adduser   '{"ok":false,"error":"ValidationError: child \\"password\\" fails because [\\"password\\" is required]"}' ]
+13 error Error: ValidationError: child "password" fails because ["password" is required] : -/user/org.couchdb.user:super_mary
+13 error     at RegClient.<anonymous> (D:\Program Files\nodeJS2\node_modules\npm\node_modules\npm-registry-client\lib\request.js:237:14)
+13 error     at Request.self.callback (D:\Program Files\nodeJS2\node_modules\npm\node_modules\request\request.js:123:22)
+13 error     at Request.EventEmitter.emit (events.js:98:17)
+13 error     at Request.<anonymous> (D:\Program Files\nodeJS2\node_modules\npm\node_modules\request\request.js:893:14)
+13 error     at Request.EventEmitter.emit (events.js:117:20)
+13 error     at IncomingMessage.<anonymous> (D:\Program Files\nodeJS2\node_modules\npm\node_modules\request\request.js:844:12)
+13 error     at IncomingMessage.EventEmitter.emit (events.js:117:20)
+13 error     at _stream_readable.js:920:16
+13 error     at process._tickCallback (node.js:415:13)
+14 error If you need help, you may report this *entire* log,
+14 error including the npm and node versions, at:
+14 error     <http://github.com/npm/npm/issues>
+15 error System Windows_NT 6.1.7601
+16 error command "D:\\Program Files\\nodeJS2\\\\node.exe" "D:\\Program Files\\nodeJS2\\node_modules\\npm\\bin\\npm-cli.js" "adduser"
+17 error cwd D:\0A-Mary\0A-nodeJS\sevenDays
+18 error node -v v0.10.26
+19 error npm -v 1.4.3
+20 verbose exit [ 1, true ]

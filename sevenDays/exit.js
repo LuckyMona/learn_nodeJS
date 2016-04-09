@@ -1,6 +1,9 @@
+
+
 try{
 
 	throw 'throw an err';
+	
 }catch(err){
 
 	console.log(err);

@@ -1,0 +1,1 @@
+these are codes I typed when I read the tutorial 'learnyounode' in http://nodeschool.io/

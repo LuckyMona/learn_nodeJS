@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<meta charset="utf-8" >
+	<style>
+h1,h2,h3,h4,h5,ul,li,ol,p,img,dl,dt,dd,table,tr,td,th,input,textarea { margin:0; padding:0; border:none; }
+ul,li,ol { list-style:none; }
+* { font-size: 14px;
+  font-family: "microsoft yahei";
+  color:#000;
+  
+  }
+.wp { width:1178px; margin:20px auto; }
+.xiaopiao > div { width:575px; border:1px solid #ccc; }
+.xiaopiao .index-left { float:left; }
+.xiaopiao .index-right { float:right; }
+.xiaopiao > div h2 { box-sizing: border-box; height:40px; width:100%; line-height:40px; font-size:20px; font-weight:bold; color:#fff; background:#d20000; padding-left:20px; }
+.xiaopiao .m-down { width:100%; }
+.xiaopiao .m-menu { width:140px; float:left; }
+.xiaopiao .m-menu ul { width:140px; }
+.xiaopiao .m-menu li { width:140px; height:40px; line-height:40px; background:#dfdfdf; border:1px solid #ccc; border-top:none; border-left:none; text-align:center; }
+.xiaopiao .m-menu li:last-child { border-bottom:none; }
+.xiaopiao .m-menu li.active { background:#d20000; color:#fff; }
+.xiaopiao .m-content { float:right; width:433px; }
+.xiaopiao .m-content ul { margin:20px; margin-right:10px; margin-bottom:10px; }
+.xiaopiao .m-content li { text-align:center; float:left; width:90px; height:30px; margin-right:10px; margin-bottom:10px; line-height:30px; background:#eee; }
+
+.xiaopiao .index-right .thirdFloor { clear:both; }
+.xiaopiao .index-right .thirdFloor ul { border-top: 1px dashed #ccc; margin-top:0; padding-top:20px; }
+.xiaopiao .index-right .thirdFloor li { width:70px; font-size:12px; }
+
+.xiaopiao .m-content >ul li.active { background:#fcc; }
+	</style>
+	<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+	<script src="city.js"></script>
+</head>
+<body>
+<div class="wp">
+	<div class="Logistics xiaopiao site-center fix">
+		<div class="index-left">
+			<h2>省内专线（江西-南昌）</h2>
+			<div class="m-down">
+				<div class="m-menu">
+					<ul>
+													
+					</ul>
+				</div>
+				<div class="m-content">
+					<ul>
+						
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="index-right">
+			<h2>省外专线</h2>
+			<div class="m-down">
+				<div class="m-menu">
+					<ul class="clearfix">
+													
+					</ul>
+				</div>
+				<div class="m-content">
+					<ul class="clearfix">
+						
+					</ul>
+					<div class="thirdFloor clearfix">
+						<ul class="districtUl clearfix">
+							
+						</ul>
+					</div>
+				</div>
+			</div>
+		
+		</div>
+	</div>
+</div>	
+	<!-- 省内省外专线 -->
+	<script>
+	(function(){
+		
+		
+		var ul_l = $('.index-left .m-menu ul');
+		var ulCon_l = $('.index-left .m-content ul');
+		var ul_r = $('.index-right .m-menu ul');
+		var ulCon_r = $('.index-right .m-content > ul');
+		
+		var ulCon_r_sub = $('.index-right .m-content .thirdFloor ul');
+		
+		
+		tabRoute(ul_l, ulCon_l, innerPvc);
+		tabRoute(ul_r, ulCon_r, outerPvc);
+		
+		function tabRoute(ul,subUl,pvc){
+			for(i in pvc)
+			{
+				$('<li></li>').html(i).appendTo(ul);
+			}
+			
+			var firstLi = ul.children('li:eq(0)');
+			firstLi.addClass('active');
+			
+			zone(firstLi.html(),pvc,subUl);
+			
+			//首层ul点击
+			ul.children('li').each(function(k,v){
+				$(v).click(function(){
+					
+					var html = $(v).html();
+					var districtUl = subUl.siblings().find('ul');
+					
+					$(this).siblings().removeClass('active');
+					$(this).addClass('active');
+					
+					subUl.html('');
+					zone(html,pvc,subUl);
+					
+					//初始化
+					var subFirstLi = subUl.children('li:eq(0)');
+					districtUl.html('');
+					zone(subFirstLi.html(),pvc[html],districtUl);
+					
+					//第二层点击，需要解耦
+					if(ul == ul_r)
+					{
+						subUl.children('li:eq(0)').addClass('active');
+						subUl.children('li').each(function(k,v){
+							$(v).click(function(){
+								
+								$(this).siblings().removeClass('active');
+								$(this).addClass('active');
+								
+								districtUl.html('');
+								zone($(v).html(),pvc[html],districtUl);
+								
+							});
+						});
+						
+					}
+					
+				});
+				
+			});
+			
+			//初始化县区ul
+			firstLi.trigger('click');
+			
+			//填充次级ul
+			function zone(str,pvc,ul){
+				
+				var arrZone = pvc[str];
+				
+				if(!Array.isArray(arrZone))
+				{
+					var res = [];
+					for(i in arrZone)
+					{
+						res.push(i);
+						
+					}
+					arrZone = res;
+				}
+				
+				var len = arrZone.length;
+				for(var i = 0; i<len; i++)
+				{
+					$('<li></li>').html(arrZone[i]).appendTo(ul);
+				} 
+				
+				
+			};
+			
+		}
+	})()
+	
+	</script>
+</body>
+</html>

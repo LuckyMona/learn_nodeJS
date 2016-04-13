@@ -10,7 +10,7 @@ fs.open(
 						+ "("+err.message+")");
 			return;
 		}
-
+		console.log('handle:'+handle);
 		var buf = new Buffer(100000);
 		fs.read(
 			handle,buf,0,100000,null,

@@ -1,1 +1,1 @@
-This is info.txt
+This is an info.txt file

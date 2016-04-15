@@ -4,8 +4,10 @@ var http = require('http');
 function handle_request(req,res){
 
 	console.log("INCOMING_REQUSET:"+req.method+req.url);
+
 	if(req.url == '/album.json')
 	{
+
 		handle_list_albums(req,res);
 	}
 	else if(req.url.substr(0,5) == '/album' && req.url.substr(req.url.length-5) =='.json'){
@@ -25,6 +27,7 @@ function handle_list_albums(req,res){
 			send_failure(res,500,err);
 			return;
 		}
+		console.log('albums:'+albums);
 		send_success(res,{album:albums});
 	});
 
@@ -56,19 +59,24 @@ function load_album_list(callback){
 			return;
 		}
 		var only_dirs = [];
+		console.log('data:'+data);
 		(function iterator(i){
-
+			console.log('i='+i);
 			if(i = data.length)
 			{
 				callback(null,only_dirs);
+				console.log('i=length only_dirs='+only_dirs);
 				return;
 			}
 			fs.stat('album/'+ data[i],function(err,stats){
+				console.log('stats='+stats);
 				if(err){
+					console.log('err');
 					callback(make_error('file_error',JSON.stringify(err)));
 					return;
 				}
 				if(stats.isDirectory()){
+					console.log('isDiretory');
 					var obj = {name:data[i]};
 					only_dirs.push(obj);
 				}
@@ -130,17 +138,25 @@ function make_error(err,msg){
 	return e;
 }
 
-function send_success(){
+function send_success(res,data){
+	res.writeHead(200,{'Content-Type':'application/json'});
+	var output = {error:null,data:data};
+	res.end(JSON.stringify(output) +'\n');
 
 }
 
-function send_failure(){
-
+function send_failure(res,code,err){
+	var code = err.code ? err.code:err.name;
+	res.writeHead(code,{'Content-Type':'application/json'});
+	res.end(JSON.stringify({error:code,message:err.message}) + '\n');
 }
 
 function invalid_resource(){
-
+	return make_error('invalid_resource','ths requested resource does not exist.');
 }
 function no_such_album(){
-
+	return make_error('no_such_album','the specified album does not exist');
 }
+
+var s = http.createServer(handle_request);
+s.listen(8080);

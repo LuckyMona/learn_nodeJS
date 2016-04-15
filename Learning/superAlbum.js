@@ -98,18 +98,36 @@ function load_album(album_name,callback){
 		var only_files = [];
 		var path = 'album/'+album_name+'/';
 		(function iterator(i){
-			if(i==files.length)
+			if(i == files.length)
 			{
-				//TODO
-				callback(null,obj);
+				var obj = { short_name:album_name, photos:only_files };
+				callback(null, obj);
+				return;
 			}
+			fs.stat(path+files[i],
+				function(err,stats){
+					if(err)
+					{
+						callback(make_error("file_error", JSON.stringify(err)));
+						return;
+					}
+					if(stats.isFile())
+					{
+						var obj = { filename:fils[i], desc:files[i] };
+						only_files.push(obj);
+					}
+					iterator(i+1);
+				});
+
 		})(0);
 	});
 
 }
 
-function make_error(){
-
+function make_error(err,msg){
+	var e = new Error(msg);
+	e.code = err;
+	return e;
 }
 
 function send_success(){

@@ -10,7 +10,7 @@ function handle_request(req,res){
 
 		handle_list_albums(req,res);
 	}
-	else if(req.url.substr(0,5) == '/album' && req.url.substr(req.url.length-5) =='.json'){
+	else if(req.url.substr(0,6) == '/album' && req.url.substr(req.url.length-5) =='.json'){
 		handle_get_album(req,res);
 	}
 	else
@@ -34,7 +34,7 @@ function handle_list_albums(req,res){
 }
 
 function handle_get_album(req,res){
-	var album_name = req.url.substr(7,req.url.length-12);
+	var album_name = req.url.substr(6,req.url.length-11);
 	loadAlbum(album_name,function(err,album){
 		if(err && err.error == 'no_such_album')
 		{
@@ -68,8 +68,11 @@ function load_album_list(callback){
 				console.log('i=length only_dirs='+only_dirs);
 				return;
 			}
+			/*fs.stat('album/italy',function(err,stats){
+				console.log('italy');
+			});*/
 			fs.stat('album/'+ data[i],function(err,stats){
-				console.log('stats='+stats);
+				console.log('stats=');
 				if(err){
 					console.log('err');
 					callback(make_error('file_error',JSON.stringify(err)));
@@ -77,7 +80,7 @@ function load_album_list(callback){
 				}
 				if(stats.isDirectory()){
 					console.log('isDiretory');
-					var obj = {name:data[i]};
+					var obj = { 'name':data[i]};
 					only_dirs.push(obj);
 				}
 				iterator(i+1);
@@ -88,7 +91,7 @@ function load_album_list(callback){
 
 }
 
-function load_album(album_name,callback){
+function loadAlbum(album_name,callback){
 	fs.readdir('album/'+album_name,function(err,files){
 		if(err)
 		{
@@ -121,7 +124,7 @@ function load_album(album_name,callback){
 					}
 					if(stats.isFile())
 					{
-						var obj = { filename:fils[i], desc:files[i] };
+						var obj = { filename:files[i], desc:files[i] };
 						only_files.push(obj);
 					}
 					iterator(i+1);

@@ -10,9 +10,9 @@ function handle_request(req,res){
 
 		getAlbumsListHandle(req,res);
 
-	}
+	} 
 	else if(req.url.substr(0,6) == '/album' && req.url.substr(req.url.length-5) =='.json'){
-
+		
 		getAlbumHandle(req,res);
 	}
 	else
@@ -23,7 +23,7 @@ function handle_request(req,res){
 }
 
 function getAlbumsListHandle(req,res){
-	getAlbumsList(function(err,albums){
+	getAlbumsList(function(err,albums){		
 		if(err)
 		{
 			send_failure(res,500,err);
@@ -53,9 +53,9 @@ function getAlbumHandle(req,res){
 }
 function getAlbumsList(callback){
 	fs.readdir('album',function(err,data){
-
+		
 		if(err)
-		{
+		{	
 			callback(make_error('file_error',JSON.stringify(err)));
 			return;
 		}
@@ -100,37 +100,37 @@ function getAlbum(albumName,callback){
 			else{
 				callback(make_error('file_error',JSON.stringify(err)));
 			}
-			return;	
+			return;
 		}
 
-		var only_files = [];
-		var path = 'album/'+albumName+'/';
-		(function iterator(i){
-			if(i == files.length)
-			{
-				var obj = { short_name:album_name, photos:only_files };
-				callback(null, obj);
-				return;
-			}
-			fs.stat(path+files[i],
-				function(err,stats){
-					if(err)
-					{
-						callback(make_error("file_error", JSON.stringify(err)));
-						return;
-					}
-					if(stats.isFile())
-					{
-						var obj = { filename:files[i], desc:files[i] };
-						only_files.push(obj);
-					}
-					iterator(i+1);
-				});
-
-		})(0);
+		var len = files.length;
+		var albumsList = [];
+		for(var i=0; i<len; i++)
+		{
+			var obj = {
+				'name':files[i],
+				'desc':files[i]
+			};
+			albumsList.push(obj);
+		}
+		callback(null,albumsList);
 	});
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function make_error(err,msg){
 	var e = new Error(msg);
@@ -157,6 +157,7 @@ function invalid_resource(){
 function no_such_album(){
 	return make_error('no_such_album','the specified album does not exist');
 }
+
 
 var s = http.createServer(handle_request);
 s.listen(8080);

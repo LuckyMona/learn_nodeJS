@@ -1,6 +1,8 @@
 var fs = require('fs');
 var http = require('http');
+var url = require('url');
 
+//url格式：http://localhost:8080/album/albumname/rename.json
 function handle_request(req,res){
 
 	console.log("INCOMING_REQUSET:"+req.method+req.url);
@@ -10,8 +12,10 @@ function handle_request(req,res){
 
 		getAlbumsListHandle(req,res);
 
-	}
-	else if(req.url.substr(0,6) == '/album' && req.url.substr(req.url.length-5) =='.json'){
+	} else if (req.url.substr(req.url.length - 12) == 'rename.json') {
+		renameAlbumHandle(req, res);
+
+	} else if (req.url.substr(0,6) == '/album' && req.url.substr(req.url.length-5) =='.json'){
 
 		getAlbumHandle(req,res);
 	}
@@ -22,6 +26,57 @@ function handle_request(req,res){
 
 }
 
+function renameAlbumHandle(req, res){
+	var json_body = "";
+	req.on(
+			'readable',
+			function(){
+				var d = req.read();
+				if(d)
+				{
+					if (typeof d == 'string')
+					{
+						json_body += d;
+					} else if (typeof d == 'object' && d instanceof Buffer) {
+						json_body += d.toString('utf8');
+					}
+				}
+			});
+	req.on(
+			'end',
+			function(){
+				if(json_body)
+				{
+					try{
+						var album_data = JSON.parse(json_body);
+						if (!album_data.album_name)
+						{
+							send_failure(res, 403, missing_data('album_name'));
+							return; 
+						}
+					} catch(e) {
+						send_failure(res, 403, bad_json());
+						return; 
+					}
+
+					do_rename(
+								album_name,
+								album_data.album_name,
+								function(err,results){
+									if(err && err.code == 'ENOENT'){
+										send_failure(res, 403, no_such_album());
+										return;
+									} else if (err) {
+										send_failure(res, 500, file_error(err));
+										return;
+									}
+									send_success(res, null);
+
+								});
+
+				}
+			});
+}
 function getAlbumsListHandle(req,res){
 	getAlbumsList(function(err,albums){
 		if(err)
@@ -136,6 +191,10 @@ function make_error(err,msg){
 	return e;
 }
 
+function file_error(err) {
+    var msg = "There was a file error on the server: " + err.message;
+    return make_error("server_file_error", msg);
+}
 function send_success(res,data){
 	res.writeHead(200,{'Content-Type':'application/json'});
 	var output = {error:null,data:data};

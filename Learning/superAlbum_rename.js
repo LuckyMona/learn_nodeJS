@@ -1,17 +1,25 @@
 var fs = require('fs');
 var http = require('http');
+var url = require('url');
 
+//url格式：http://localhost:8080/album/albumname/rename.json
 function handle_request(req,res){
 
 	console.log("INCOMING_REQUSET:"+req.method+req.url);
+	req.parsed_url = url.parse(req.url);
+	core_url = req.parsed_url.pathname;
 
-	if(req.url == '/album.json')
+	if(core_url == '/album.json')
 	{
 
 		getAlbumsListHandle(req,res);
 
+	}else if( core_url.substr(core_url.length - 12) == '/rename.json'
+			  && core_url.method.toLowerCase() == 'post'){
+		renameAlbumHandle(req,res);
+
 	}
-	else if(req.url.substr(0,6) == '/album' && req.url.substr(req.url.length-5) =='.json'){
+	else if(core_url.substr(0,6) == '/album' && core_url.substr(core_url.length-5) =='.json'){
 
 		getAlbumHandle(req,res);
 	}
@@ -21,7 +29,66 @@ function handle_request(req,res){
 	}
 
 }
+function renameAlbumHandle(req,res){
+	var album_name = core_url.split('/')[2];
+	var json_body = '';
+	 req.on(
+	 		'readable', 
+	 		function(){
+	 			var d = req.read();
+	 			if(d){
+	 				if(typeof d == 'string')
+	 				{
+	 					json_body+=d;
+	 				}else if (typeof d == 'object' && d instanceof Buffer){
+	 					json_body += d.toString('utf8');
+	 				}
+	 			}
+	 		});
+	 req.on(
+	 		'end',
+	 		function(){
+	 			if(json_body){
+	 				try{
+	 					var album_data = JSON.parse(json_body);
+	 					if(!album_data.album_name)
+	 					{
+	 						send_failure(res, 403, missing_data('album_name'));
+	 						return;
+	 					}
+	 				}catch(e){
+	 					send_failure(res, 403, bad_json());
+	 					return;
+	 				}
 
+	 				do_rename(
+	 					album,
+	 					album_data.album_name,
+	 					function(err,results){
+	 						if(err && err.code == 'ENOENT'){
+	 							send_failure(res, 403, no_such_album());
+	 							return;
+	 						} else if (err) {
+	 							send_failure(res,500,file_error(err));
+	 							return;
+	 						}
+	 						send_success(res,null);
+	 					}
+	 				);
+
+	 			} else {
+	 				send_failure(res, 403, bad_json());
+	 				res.end();
+	 			}
+
+	 		});
+}
+function do_rename(old_name, new_name, callback){
+	fs.rename(
+		'album/'+ old_name,
+		'album/'+ new_name,
+		callback);
+}
 function getAlbumsListHandle(req,res){
 	getAlbumsList(function(err,albums){
 		if(err)
@@ -35,7 +102,7 @@ function getAlbumsListHandle(req,res){
 }
 
 function getAlbumHandle(req,res){
-	var albumName = req.url.substr(6,req.url.length-11);
+	var albumName = core_url.substr(6,req.url.length-11);
 	getAlbum(albumName,function(err,album){
 		if(err && err.error == 'no_such_album')
 		{
@@ -106,7 +173,7 @@ function getAlbum(albumName,callback){
 		(function iterator(i){
 			if(i == files.length)
 			{
-				var obj = { short_name:album_name, photos:only_files };
+				var obj = { short_name:albumName, photos:only_files };
 				callback(null, obj);
 				return;
 			}
@@ -129,7 +196,15 @@ function getAlbum(albumName,callback){
 	});
 
 }
+function bad_json() {
+    return make_error("invalid_json",
+                      "the provided data is not valid JSON");
+}
 
+function file_error(err) {
+    var msg = "There was a file error on the server: " + err.message;
+    return make_error("server_file_error", msg);
+}
 function make_error(err,msg){
 	var e = new Error(msg);
 	e.code = err;
@@ -143,6 +218,12 @@ function send_success(res,data){
 
 }
 
+function missing_data (missing) {
+    var msg = missing
+        ? "Your request is missing: '" + missing + "'"
+        : "Your request is missing some data.";
+    return make_error("missing_data", msg);
+}
 function send_failure(res,code,err){
 	var code = err.code ? err.code:err.name;
 	res.writeHead(code,{'Content-Type':'application/json'});

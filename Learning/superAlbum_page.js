@@ -1,17 +1,18 @@
 var fs = require('fs');
 var http = require('http');
+var url = require('url');
 
 function handle_request(req,res){
 
 	console.log("INCOMING_REQUSET:"+req.method+req.url);
-
-	if(req.url == '/album.json')
+	req.parsed_url = url.parse(req.url,true);
+	core_url = req.parsed_url.pathname;
+	if(core_url == '/album.json')
 	{
 
 		getAlbumsListHandle(req,res);
 
-	}
-	else if(req.url.substr(0,6) == '/album' && req.url.substr(req.url.length-5) =='.json'){
+	}else if(core_url.substr(0,6) == '/album' && core_url.substr(core_url.length-5) =='.json'){
 
 		getAlbumHandle(req,res);
 	}
@@ -35,8 +36,17 @@ function getAlbumsListHandle(req,res){
 }
 
 function getAlbumHandle(req,res){
-	var albumName = req.url.substr(6,req.url.length-11);
-	getAlbum(albumName,function(err,album){
+	
+	var query =  req.parsed_url.query;
+	var page = query.page ? query.page:0;
+	var size = query.size ? query.size : 1000;
+	if(isNaN(page)) page = 0;
+	if(isNaN(size)) size = 1000;
+	console.log('page:'+page+',size:'+size);
+
+	var albumName = core_url.substr(6,core_url.length-11);
+	console.log('albumName:'+albumName);
+	getAlbum(albumName, page, size, function(err,album){
 		if(err && err.error == 'no_such_album')
 		{
 			send_failure(res,404,err);
@@ -64,7 +74,7 @@ function getAlbumsList(callback){
 		(function iterator(i){
 			if(i == data.length)
 			{
-				callback(null,{data:only_dirs});
+				callback(null,{'album':only_dirs});
 				console.log('i=length only_dirs='+only_dirs);
 				return;
 			}
@@ -87,7 +97,7 @@ function getAlbumsList(callback){
 	});
 }
 
-function getAlbum(albumName,callback){
+function getAlbum(albumName, page, size, callback){
 	fs.readdir('album/'+albumName, function(err,files){
 		if(err)
 		{
@@ -106,7 +116,8 @@ function getAlbum(albumName,callback){
 		(function iterator(i){
 			if(i == files.length)
 			{
-				var obj = { short_name:album_name, photos:only_files };
+				var ps = only_files.splice(page*size,size);
+				var obj = { short_name:albumName, photos:ps };
 				callback(null, obj);
 				return;
 			}

@@ -51,6 +51,12 @@ function getAlbumsList(res,callback){
 			
 			fs.stat('album/'+files[i],function(err,stats){
 
+				if( i==files.length)
+				{
+					var obj = {name:onlyDirs};
+					callback(null,obj);
+					return;
+				}
 				if(err)
 				{
 					callback(makeErr(err.code, 'fs stat error'));

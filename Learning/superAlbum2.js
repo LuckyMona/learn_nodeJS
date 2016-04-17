@@ -62,15 +62,13 @@ function getAlbumsList(callback){
 
 		var onlyDirs = [];
 		(function iterator(i){
-			if(i = data.length)
+			if(i == data.length)
 			{
-				callback(null,only_dirs);
-				console.log('i=length only_dirs='+only_dirs);
+				var obj = {name:onlyDirs};
+				callback(null,onlyDirs);
 				return;
 			}
-			/*fs.stat('album/italy',function(err,stats){
-				console.log('italy');
-			});*/
+			
 			fs.stat('album/'+data[i],function(err,stats){
 				if(err)
 				{

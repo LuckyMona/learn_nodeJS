@@ -25,6 +25,12 @@ function handle_request(req,res){
 	}
 
 }
+function do_rename(old_name, new_name, callback){
+	fs.rename(
+		'album/' + old_name,
+		'album/' + new_name,
+		callback);
+}
 
 function renameAlbumHandle(req, res){
 	var json_body = "";
@@ -201,6 +207,18 @@ function send_success(res,data){
 	res.end(JSON.stringify(output) +'\n');
 
 }
+function missing_data (missing) {
+    var msg = missing
+        ? "Your request is missing: '" + missing + "'"
+        : "Your request is missing some data.";
+    return make_error("missing_data", msg);
+}
+
+function bad_json() {
+    return make_error("invalid_json",
+                      "the provided data is not valid JSON");
+}
+
 
 function send_failure(res,code,err){
 	var code = err.code ? err.code:err.name;

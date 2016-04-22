@@ -5,15 +5,21 @@ function Album(album_path){
 	this.name = path.basename(album_path);
 	this.path = album_path;
 }
+Album.prototype.name = null;
+Album.prototype.path = null;
+Album.prototype._photos = null;
+
 Album.prototype.photos = function(callback){
-	if(this._photos !=null)
+	if(this._photos != null)
 	{
 		callback(null, this._photos);
 		return;
 	}
 
 	var self = this;
-	fs.readdir(self.path,function(err,files){
+	fs.readdir(
+		self.path,
+		function(err, files){
 		if(err){
 			if(err.code =="ENOENT"){
 				callback(no_such_album());
@@ -34,7 +40,7 @@ Album.prototype.photos = function(callback){
 				callback(null,self._photos);
 				return;
 			}
-			fs.stat(self.path+"/"+file[i], function(err, stats){
+			fs.stat(self.path+"/"+files[i], function(err, stats){
 
 				if(err){
 					callback( {error:'file_error',message:JSON.stringify(err)} );
@@ -48,6 +54,10 @@ Album.prototype.photos = function(callback){
 			});
 		})(0);
 	});
+}
+
+exports.create_album = function(path){
+	return new Album(path);
 }
 
 function no_such_album(){

@@ -1,5 +1,7 @@
 {
 "name":"album_mgr2",
 "version":"1.0.0",
-"main":"./lib/albums.js"
+"main":"./lib/albums.js"£¬
+"private":true
+
 }

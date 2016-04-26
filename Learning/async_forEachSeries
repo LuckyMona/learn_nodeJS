@@ -1,0 +1,13 @@
+var async = require('async');
+
+//对异步函数进行循环
+async.forEachSeries(
+		arr,
+		//called for each element in arr
+		function(element,callback){
+			callback(null);
+		},
+		function(err){
+
+		}
+	);

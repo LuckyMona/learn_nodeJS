@@ -1,12 +1,14 @@
+
 $(function(){
 	var tmpl,
 	tdata = {};
-
+	
 	var initPage = function(){
 
 		parts = window.location.href.split("/");
 		var album_name = parts[5];
 
+		console.log('album.js'+album_name);
 		$.get("/templates/album.html", function(d){
 			tmpl = d;
 		});
@@ -14,6 +16,11 @@ $(function(){
 		$.getJSON("/albums/" + album_name +".json", function(d){
 			var photo_d = massage_album(d);
 			$.extend(tdata, photo_d);
+
+		});
+		$(document).ajaxStop(function(){
+			var renderedPage = Mustache.to_html( tmpl, tdata );
+			$('body').html(renderedPage);
 		});
 	}();
 });

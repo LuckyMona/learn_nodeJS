@@ -165,6 +165,11 @@ function serve_page(req, res) {
     );
 }
 
+//访问地址：
+//localhost:8080/pages/home ==>展示相册列表
+//localhost:8080/pages/album/italy ==>展示相册中的图片列表
+//localhost:8080/albums/italy/1.jpg  ==>展示图片 （目前失败）
+
 function handle_incoming_request(req, res) {
 
     // parse the query params into an object and get the path
@@ -184,6 +189,9 @@ function handle_incoming_request(req, res) {
     } else if (core_url.substr(0, 7) == '/albums'
                && core_url.substr(core_url.length - 5) == '.json') {
         handle_get_album(req, res);
+    } else if (core_url.substr(0, 7) == '/albums'
+               && core_url.substr(core_url.length - 4) == '.jpg') {
+        serve_static_file(core_url, res);
     } else {
         send_failure(res, 404, invalid_resource());
     }

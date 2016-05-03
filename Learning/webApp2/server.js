@@ -2,12 +2,14 @@ var http = require('http');
 var fs = require('fs');
 var url = require('url');
 var path = require('path');
+var async = require('async');
 
 function handle_incoming_request(req, res){
 	var core_url = url.parse(req.url).pathname;
 	if(core_url.substring(0,7) == "/pages/"){
 		serve_page(core_url, res);
-	} else if ( core_url == "albums.json"){
+	} else if ( core_url == "/albums.json"){
+		
 		handle_album_list(req,res);
 	} else if ( core_url.substring(0,9) == "/content/") {
 		serve_static_page( core_url.substring(1), res);
@@ -47,7 +49,7 @@ function handle_album_list(req, res){
 			send_failure(res, err);
 			return;
 		}
-		console.log(files);
+		console.log('album_list'+files);
 		send_success(res, files);
 	});
 
@@ -55,7 +57,7 @@ function handle_album_list(req, res){
 function load_album_list(path, callback){
 	fs.readdir(path, function(files){
 		var only_dirs = [];
-		fs.forEach(
+		async.forEach(
 			files,
 			function(elem, callback){
 				fs.stat('/albums'+'/'+elem, function(err, stats){
@@ -72,6 +74,7 @@ function load_album_list(path, callback){
 				callback(err);
 			}
 		);
+		console.log('only_dirs'+only_dirs);
 		callback(null, only_dirs);
 	});
 }

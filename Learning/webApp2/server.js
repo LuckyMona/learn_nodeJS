@@ -7,19 +7,91 @@ function handle_incoming_request(req, res){
 	var core_url = url.parse(req.url).pathname;
 	if(core_url.substring(0,7) == "/pages/"){
 		serve_page(core_url, res);
-	}
+	} else if ( core_url == "albums.json"){
+		handle_album_list(req,res);
+	} else if ( core_url.substring(0,9) == "/content/") {
+		serve_static_page( core_url.substring(1), res);
+	} else if ( core_url.substring(0, 11) =="/templates/") {
+		serve_static_page( core_url.substring(1), res);
+	}	
+}
+function serve_static_page(path, res){
+	
+	var ct = get_content_type(path.split('/')[2]);
+	fs.exists(path, function(exists){
+		
+		if(!exists){
+			// console.log('not exists ');
+			res.writeHead(404, {"Content-Type":ct});
+			var out = {
+				error:"file '"+path+"' not found",
+				message:"file '"+path+"' not found"
+			};
+			res.end(JSON.stringify(out));
+			return; 
+		}
+	});
+	var rs = fs.createReadStream(path);
+	
+	rs.on('error', function(e){
+		res.end();
+	});
+	
+	res.writeHead(200, {"Content-Type":ct});
+	rs.pipe(res);
 }
 
+function handle_album_list(req, res){
+	load_album_list('/albums',function(err, files){
+		if(err){
+			send_failure(res, err);
+			return;
+		}
+		console.log(files);
+		send_success(res, files);
+	});
 
+}
+function load_album_list(path, callback){
+	fs.readdir(path, function(files){
+		var only_dirs = [];
+		fs.forEach(
+			files,
+			function(elem, callback){
+				fs.stat('/albums'+'/'+elem, function(err, stats){
+					if(err){
+						callback(err);
+						return;
+					}
+					if(stats.isDirectory()){
+						only_dirs.push(elem);
+					}
+				})
+			},
+			function(err){
+				callback(err);
+			}
+		);
+		callback(null, only_dirs);
+	});
+}
+function send_failure(res, err){
+	res.writeHead(404, {"Content-Type":"application/json"});
+	res.end(JSON.stringify(err));
+}
+
+function send_success(res, files){
+	res.writeHead(200, {"Content-Type":"application/json"});
+	res.end(JSON.stringify(files));
+}
 
 function serve_page(path, res){
-	console.log('path:'+path);
+
 	var name = get_name(path);
-	console.log('name:'+name);
 	fs.exists('basic.html',function(exists){
-		var ct = get_content_type('basic.html');		
+				
 		if(!exists){		
-			res.writeHead(404, {'content-type':ct});
+			res.writeHead(404, {'content-type':"text/html"});
 			res.end({
 				error:"file_not_found",
 				message:"file_not_found"
@@ -60,7 +132,6 @@ function serve_page(path, res){
 	rs.on('end',function(){
 		
 		contents = contents.replace('{{PAGE_NAME}}', name);
-		console.log('contents:'+contents);
 		res.writeHead(200, {"Content-Type":"text/html"});
 		res.end(contents);
 	})
@@ -82,7 +153,6 @@ function get_content_type(file_path){
 }
 function get_name(path){
 	var name = path.split('/')[2];
-	console.log('path2:'+path);
 	return name;
 }
 

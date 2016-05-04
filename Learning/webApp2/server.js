@@ -23,7 +23,7 @@ function serve_static_page(path, res){
 	fs.exists(path, function(exists){
 		
 		if(!exists){
-			// console.log('not exists ');
+			
 			res.writeHead(404, {"Content-Type":ct});
 			var out = {
 				error:"file '"+path+"' not found",
@@ -44,38 +44,39 @@ function serve_static_page(path, res){
 }
 
 function handle_album_list(req, res){
-	load_album_list('/albums',function(err, files){
+	load_album_list('albums',function(err, files){
 		if(err){
 			send_failure(res, err);
 			return;
 		}
-		console.log('album_list'+files);
-		send_success(res, files);
+		
+		send_success(res, {albums:files});
 	});
 
 }
 function load_album_list(path, callback){
-	fs.readdir(path, function(files){
+	fs.readdir(path, function(err,files){
+		
 		var only_dirs = [];
 		async.forEach(
 			files,
 			function(elem, callback){
-				fs.stat('/albums'+'/'+elem, function(err, stats){
+				fs.stat('albums/'+ elem, function(err, stats){
 					if(err){
 						callback(err);
 						return;
 					}
 					if(stats.isDirectory()){
-						only_dirs.push(elem);
+						only_dirs.push({name:elem});
 					}
+					callback(null);
 				})
 			},
 			function(err){
-				callback(err);
+				callback(err, err?null:only_dirs);
 			}
 		);
-		console.log('only_dirs'+only_dirs);
-		callback(null, only_dirs);
+		
 	});
 }
 function send_failure(res, err){

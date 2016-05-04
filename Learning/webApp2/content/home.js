@@ -5,11 +5,14 @@ $(function(){
 		$.get('/templates/home.html', function(d){
 			tmpl = d;
 		});
+		console.log('get');
 		$.getJSON("/albums.json", function(d){
-			console.log('d.data'+d.data);
-			$.extend(tData, d.data);
+			console.log('getJSON');
+			console.log('d'+d.albums);
+			$.extend(tData, d.albums);
 
 		});
+		console.log('get2');
 		$(document).ajaxStop(function(){
 			var renderedPage = Mustache.to_html(tmpl, tData);
 			$('body').html(renderedPage);

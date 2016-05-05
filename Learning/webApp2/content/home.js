@@ -8,8 +8,8 @@ $(function(){
 		console.log('get');
 		$.getJSON("/albums.json", function(d){
 			console.log('getJSON');
-			console.log('d'+d.albums);
-			$.extend(tData, d.albums);
+			console.log('d'+ d.data);
+			$.extend(tData, d.data);
 
 		});
 		console.log('get2');

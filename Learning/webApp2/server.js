@@ -9,7 +9,6 @@ function handle_incoming_request(req, res){
 	if(core_url.substring(0,7) == "/pages/"){
 		serve_page(core_url, res);
 	} else if ( core_url == "/albums.json"){
-		
 		handle_album_list(req,res);
 	} else if ( core_url.substring(0,9) == "/content/") {
 		serve_static_page( core_url.substring(1), res);
@@ -86,7 +85,12 @@ function send_failure(res, err){
 
 function send_success(res, files){
 	res.writeHead(200, {"Content-Type":"application/json"});
-	res.end(JSON.stringify(files));
+	var out = { 
+		error:null,
+		data:files
+	};
+
+	res.end(JSON.stringify(out));
 }
 
 function serve_page(path, res){

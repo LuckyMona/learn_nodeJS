@@ -1,8 +1,8 @@
 <div>
 	<p>There are {{albums.length}} photos.</p>
 	<ul>
-	{{}}
-		<li></li>
-
+	{{#albums}}
+		<li>{{name}}</li>
+	{{/albums}}
 	</ul>
 </div>

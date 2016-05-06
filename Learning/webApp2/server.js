@@ -10,11 +10,53 @@ function handle_incoming_request(req, res){
 		serve_page(core_url, res);
 	} else if ( core_url == "/albums.json"){
 		handle_album_list(req,res);
+	} else if ( core_url.substring(0,7) == "/albums" 
+		&& core_url.substring(core_url.length - 5) == '.json'){
+		handle_album(core_url,res);
 	} else if ( core_url.substring(0,9) == "/content/") {
 		serve_static_page( core_url.substring(1), res);
 	} else if ( core_url.substring(0, 11) =="/templates/") {
 		serve_static_page( core_url.substring(1), res);
 	}	
+}
+function handle_album (url, res){
+	
+	get_album(url.substring(1), function(err, files){
+		if(err){
+			send_failure(res, err);
+			return;
+		}
+		send_success(res, { albums: files });
+	} );
+}
+function get_album(path, callback){
+	var p = path.substring(0,path.substring(path.length-5));
+	var album_name = get_name(p);
+	fs.readdir(p, function(err,files){
+		if(err){
+			send_failure(err);
+			return;
+		}
+		var only_files = [];
+		async.forEach(
+			files,
+			function(elem, callback){
+				fs.stats(elem, function(err, stats){
+					if(err){
+						callback(err);
+						return;
+					}
+					if(stats.isFile()){
+						only_files.push({name:elem});
+					}
+
+				});
+			},
+			function(err){
+				callback(err, err?null:{album_name:only_files});
+			}
+		);
+	});
 }
 function serve_static_page(path, res){
 	

@@ -2,10 +2,11 @@ $(function(){
 	var tData = {};
 	var tmpl = "";
 	var initPage = (function(){
-		console.log(window.href);
-		var splits = window.href.split('/')[5];
-		console.log(splits);
+
+		var splits = window.location.href.split('/');
+		
 		var name = splits[5];
+		
 		$.get('/albums/'+name+'.json', function(d){
 			$.extend(tData, d.data);
 		});
@@ -13,7 +14,7 @@ $(function(){
 			tmpl = d;
 		});
 		$(document).ajaxStop(function(){
-			var renderedPage = mustache.to_html(tmpl, tData);
+			var renderedPage = Mustache.to_html(tmpl, tData);
 			$('body').html(renderedPage);
 		});
 	})();

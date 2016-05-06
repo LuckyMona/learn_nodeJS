@@ -12,6 +12,7 @@ function handle_incoming_request(req, res){
 		handle_album_list(req,res);
 	} else if ( core_url.substring(0,7) == "/albums" 
 		&& core_url.substring(core_url.length - 5) == '.json'){
+		console.log('handle_album core_url:'+ core_url);
 		handle_album(core_url,res);
 	} else if ( core_url.substring(0,9) == "/content/") {
 		serve_static_page( core_url.substring(1), res);
@@ -20,8 +21,8 @@ function handle_incoming_request(req, res){
 	}	
 }
 function handle_album (url, res){
-	
-	get_album(url.substring(1), function(err, files){
+	console.log('handle_album url:'+url);
+	get_album(url.substring(1), res, function(err, files){
 		if(err){
 			send_failure(res, err);
 			return;
@@ -29,12 +30,12 @@ function handle_album (url, res){
 		send_success(res, { albums: files });
 	} );
 }
-function get_album(path, callback){
+function get_album(path, res, callback){
 	var p = path.substring(0,path.substring(path.length-5));
 	var album_name = get_name(p);
 	fs.readdir(p, function(err,files){
 		if(err){
-			send_failure(err);
+			send_failure(res,err);
 			return;
 		}
 		var only_files = [];

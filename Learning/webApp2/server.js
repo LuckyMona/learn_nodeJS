@@ -12,7 +12,7 @@ function handle_incoming_request(req, res){
 		handle_album_list(req,res);
 	} else if ( core_url.substring(0,7) == "/albums" 
 		&& core_url.substring(core_url.length - 5) == '.json'){
-		console.log('handle_album core_url:'+ core_url);
+		console.log('here');
 		handle_album(core_url,res);
 	} else if ( core_url.substring(0,9) == "/content/") {
 		serve_static_page( core_url.substring(1), res);
@@ -21,42 +21,66 @@ function handle_incoming_request(req, res){
 	}	
 }
 function handle_album (url, res){
-	console.log('handle_album url:'+url);
-	get_album(url.substring(1), res, function(err, files){
+	console.log('handle_album');
+	get_album(url.substring(1), function(err, files){
 		if(err){
+
 			send_failure(res, err);
 			return;
 		}
-		send_success(res, { albums: files });
+		
+		send_success(res, { album_data: files });
 	} );
 }
-function get_album(path, res, callback){
-	var p = path.substring(0,path.substring(path.length-5));
+function get_album(path, callback){
+
+	var p = path.substring(0,path.length-5);
 	var album_name = get_name(p);
+	
 	fs.readdir(p, function(err,files){
 		if(err){
-			send_failure(res,err);
+			callback({
+				error:err,
+				message:"no_such_album"
+				});
 			return;
 		}
+		
 		var only_files = [];
+		
 		async.forEach(
 			files,
 			function(elem, callback){
-				fs.stats(elem, function(err, stats){
+				fs.stat(p+'/'+elem, function(err, stats){
+				
 					if(err){
 						callback(err);
 						return;
 					}
 					if(stats.isFile()){
-						only_files.push({name:elem});
+						
+						only_files.push({'name':elem});
 					}
-
+					callback(null);
 				});
 			},
 			function(err){
-				callback(err, err?null:{album_name:only_files});
+				console.log('only_files:'+only_files);
+				if(err){
+					callback(err, null);
+				} else {
+					console.log('else:'+only_files);
+					var obj = {
+						album_name:album_name,
+						photos:only_files
+					};
+					 callback(null, obj);
+				}
+				//callback(err, err?null:{'album_name':only_files});
+				//console.log('only_files:'+only_files);
 			}
 		);
+
 	});
 }
 function serve_static_page(path, res){

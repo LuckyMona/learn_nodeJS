@@ -11,3 +11,5 @@ app.configure('dev',function(){
 app.configure('production','staging',function(){
 	app.use(express.logger());
 });
+
+app.listen(8080);
